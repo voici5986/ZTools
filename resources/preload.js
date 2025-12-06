@@ -113,6 +113,8 @@ window.ztools = {
     clear: async (type) => await electron.ipcRenderer.invoke('clipboard:clear', type),
     getStatus: async () => await electron.ipcRenderer.invoke('clipboard:get-status'),
     write: async (id) => await electron.ipcRenderer.invoke('clipboard:write', id),
+    // 写入内容到剪贴板 ({ type: 'text'|'image', content: string })
+    writeContent: async (data) => await electron.ipcRenderer.invoke('clipboard:write-content', data),
     updateConfig: async (config) =>
       await electron.ipcRenderer.invoke('clipboard:update-config', config),
     // 监听剪贴板变化事件

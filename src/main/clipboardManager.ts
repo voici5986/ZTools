@@ -676,6 +676,45 @@ class ClipboardManager {
     }
   }
 
+  // 直接写入内容到剪贴板
+  public writeContent(data: { type: 'text' | 'image'; content: string }): boolean {
+    try {
+      if (data.type === 'text') {
+        clipboard.writeText(data.content)
+        return true
+      } else if (data.type === 'image') {
+        // 1. 尝试作为 DataURL 处理
+        let image = nativeImage.createFromDataURL(data.content)
+
+        // 2. 如果为空，尝试作为文件路径处理
+        if (image.isEmpty()) {
+          image = nativeImage.createFromPath(data.content)
+        }
+
+        // 3. 如果仍为空，尝试作为 Base64 处理
+        if (image.isEmpty()) {
+          try {
+            image = nativeImage.createFromBuffer(Buffer.from(data.content, 'base64'))
+          } catch {
+            // ignore
+          }
+        }
+
+        if (!image.isEmpty()) {
+          clipboard.writeImage(image)
+          return true
+        }
+
+        console.error('无效的图片内容')
+        return false
+      }
+      return false
+    } catch (error) {
+      console.error('写入内容失败:', error)
+      return false
+    }
+  }
+
   // 获取最后一次复制的文本（在指定时间内）
   public getLastCopiedText(timeLimit: number): string | null {
     if (!this.lastCopiedText) {

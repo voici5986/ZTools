@@ -3,9 +3,7 @@
     <h2 class="title">我的数据</h2>
     <p class="description">查看和管理插件存储的数据</p>
 
-    <div v-if="loading" class="loading">加载中...</div>
-
-    <div v-else-if="pluginDataList.length === 0" class="empty">
+    <div v-if="pluginDataList.length === 0" class="empty">
       <p>暂无插件数据</p>
     </div>
 
@@ -39,8 +37,7 @@
           </div>
         </div>
         <div class="modal-body">
-          <div v-if="loadingDocs" class="loading">加载文档列表中...</div>
-          <div v-else-if="docKeys.length === 0" class="empty">暂无文档</div>
+          <div v-if="docKeys.length === 0" class="empty">暂无文档</div>
           <div v-else class="doc-list">
             <div
               v-for="docItem in docKeys"
@@ -102,13 +99,11 @@ interface DocItem {
   type: 'document' | 'attachment'
 }
 
-const loading = ref(true)
 const pluginDataList = ref<PluginData[]>([])
 const showDocListModal = ref(false)
 const showDocDetailModal = ref(false)
 const currentPluginName = ref('')
 const docKeys = ref<DocItem[]>([])
-const loadingDocs = ref(false)
 const selectedDocKey = ref('')
 const currentDocContent = ref<any>(null)
 const currentDocType = ref<'document' | 'attachment'>('document')
@@ -120,8 +115,7 @@ const formattedDocContent = computed(() => {
 })
 
 // 加载插件数据统计
-async function loadPluginData() {
-  loading.value = true
+async function loadPluginData(): Promise<void> {
   try {
     const result = await window.ztools.getPluginDataStats()
     if (result.success) {
@@ -129,16 +123,13 @@ async function loadPluginData() {
     }
   } catch (error) {
     console.error('加载插件数据失败:', error)
-  } finally {
-    loading.value = false
   }
 }
 
 // 查看插件文档
-async function viewPluginDocs(pluginName: string) {
+async function viewPluginDocs(pluginName: string): Promise<void> {
   currentPluginName.value = pluginName
   showDocListModal.value = true
-  loadingDocs.value = true
 
   try {
     const result = await window.ztools.getPluginDocKeys(pluginName)
@@ -147,13 +138,11 @@ async function viewPluginDocs(pluginName: string) {
     }
   } catch (error) {
     console.error('加载文档列表失败:', error)
-  } finally {
-    loadingDocs.value = false
   }
 }
 
 // 查看文档内容
-async function viewDocContent(key: string) {
+async function viewDocContent(key: string): Promise<void> {
   selectedDocKey.value = key
   showDocDetailModal.value = true
 
@@ -169,7 +158,7 @@ async function viewDocContent(key: string) {
 }
 
 // 关闭文档列表弹窗
-function closeDocListModal() {
+function closeDocListModal(): void {
   showDocListModal.value = false
   currentPluginName.value = ''
   docKeys.value = []
@@ -177,14 +166,14 @@ function closeDocListModal() {
 }
 
 // 关闭文档详情弹窗
-function closeDocDetailModal() {
+function closeDocDetailModal(): void {
   showDocDetailModal.value = false
   selectedDocKey.value = ''
   currentDocContent.value = null
 }
 
 // 清空插件数据
-async function handleClearData() {
+async function handleClearData(): Promise<void> {
   if (!currentPluginName.value) return
 
   // 确认操作

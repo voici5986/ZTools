@@ -91,6 +91,30 @@ export class ClipboardAPI {
       }
     })
 
+    // 直接写入内容并粘贴
+    ipcMain.handle(
+      'clipboard:write-content',
+      async (_event, data: { type: 'text' | 'image'; content: string }) => {
+        // 先隐藏窗口
+        windowManager.hideWindow()
+        // 设置窗口激活状态
+        const previousActiveWindow = windowManager.getPreviousActiveWindow()
+        if (previousActiveWindow) {
+          clipboardManager.activateApp(previousActiveWindow)
+        }
+        try {
+          const result = clipboardManager.writeContent(data)
+          if (result) {
+            WindowManager.simulatePaste()
+          }
+          return { success: result }
+        } catch (error) {
+          console.error('写入剪贴板内容失败:', error)
+          return { success: false }
+        }
+      }
+    )
+
     // 更新剪贴板配置
     ipcMain.handle('clipboard:update-config', (_event, config: any) => {
       try {
