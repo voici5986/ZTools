@@ -50,9 +50,7 @@ export class UpdaterAPI {
     this.autoCheckAndDownload()
 
     // 每30分钟检查一次
-    this.checkTimer = setInterval(() => {
-      this.autoCheckAndDownload()
-    }, 30 * 60 * 1000)
+    this.checkTimer = setInterval(() => this.autoCheckAndDownload(), 30 * 60 * 1000)
   }
 
   /**
@@ -244,13 +242,6 @@ export class UpdaterAPI {
    * 启动 updater 并退出应用
    */
   private async launchUpdater(paths: UpdatePaths): Promise<void> {
-    // 检查源文件是否存在
-    try {
-      await fs.access(paths.asarSrc)
-    } catch {
-      throw new Error('找不到更新文件: app.asar')
-    }
-
     // 检查 updater 是否存在
     try {
       await fs.access(paths.updaterPath)
@@ -259,14 +250,7 @@ export class UpdaterAPI {
     }
 
     // 构建参数
-    const args = [
-      '--asar-src',
-      paths.asarSrc,
-      '--asar-dst',
-      paths.asarDst,
-      '--app',
-      paths.appPath
-    ]
+    const args = ['--asar-src', paths.asarSrc, '--asar-dst', paths.asarDst, '--app', paths.appPath]
 
     if (paths.unpackedSrc) {
       args.push('--unpacked-src', paths.unpackedSrc)
