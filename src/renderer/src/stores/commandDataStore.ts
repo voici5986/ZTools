@@ -362,6 +362,52 @@ export const useCommandDataStore = defineStore('commandData', () => {
     }
   }
 
+  /**
+   * 计算匹配分数（用于排序）
+   * @param text 被匹配的文本
+   * @param query 搜索关键词
+   * @param matches 匹配信息
+   * @returns 分数（越高越好）
+   */
+  function calculateMatchScore(text: string, query: string, matches?: MatchInfo[]): number {
+    if (!matches || matches.length === 0) return 0
+
+    let score = 0
+    const lowerText = text.toLowerCase()
+    const lowerQuery = query.toLowerCase()
+
+    // 1. 完全匹配（最高优先级）
+    if (lowerText === lowerQuery) {
+      return 10000
+    }
+
+    // 2. 前缀匹配（次高优先级）
+    if (lowerText.startsWith(lowerQuery)) {
+      score += 5000
+    }
+
+    // 3. 连续匹配检测
+    const consecutiveMatch = lowerText.includes(lowerQuery)
+    if (consecutiveMatch) {
+      score += 2000
+      // 连续匹配位置越靠前，分数越高
+      const position = lowerText.indexOf(lowerQuery)
+      score += Math.max(0, 500 - position * 10)
+    }
+
+    // 4. 匹配长度占比（匹配越多，分数越高）
+    const matchRatio = query.length / text.length
+    score += matchRatio * 100
+
+    // 5. 匹配位置（越靠前越好）
+    if (matches.length > 0 && matches[0].indices && matches[0].indices.length > 0) {
+      const firstMatchPosition = matches[0].indices[0][0]
+      score += Math.max(0, 100 - firstMatchPosition)
+    }
+
+    return score
+  }
+
   // 搜索
   function search(query: string): { bestMatches: SearchResult[]; regexMatches: SearchResult[] } {
     if (!query || !fuse.value) {
@@ -373,10 +419,18 @@ export const useCommandDataStore = defineStore('commandData', () => {
 
     // 1. Fuse.js 模糊搜索
     const fuseResults = fuse.value.search(query)
-    const bestMatches = fuseResults.map((r) => ({
-      ...r.item,
-      matches: r.matches as MatchInfo[]
-    }))
+    const bestMatches = fuseResults
+      .map((r) => ({
+        ...r.item,
+        matches: r.matches as MatchInfo[],
+        _score: r.score || 0
+      }))
+      .sort((a, b) => {
+        // 自定义排序：优先连续匹配
+        const scoreA = calculateMatchScore(a.name, query, a.matches)
+        const scoreB = calculateMatchScore(b.name, query, b.matches)
+        return scoreB - scoreA // 分数高的排前面
+      })
 
     // 2. 匹配指令匹配（从 regexCommands 中查找，包括 regex 和 over 类型）
     const regexMatches: SearchResult[] = []
