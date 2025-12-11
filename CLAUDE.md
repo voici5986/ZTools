@@ -188,6 +188,7 @@ pluginManager.createPluginView()
    - 通过 Fuse.js 进行模糊搜索
    - 支持名称、拼音、拼音首字母匹配
    - 适合：固定名称的功能、常用命令
+
 2. **正则匹配指令**（regex）：正则表达式匹配用户输入
 
    ```json
@@ -203,6 +204,7 @@ pluginManager.createPluginView()
    - 通过正则表达式匹配用户输入
    - 需满足 `minLength` 要求
    - 适合：需要提取参数的命令、格式化输入
+
 3. **任意文本匹配指令**（over）：匹配任意文本（可设置排除规则）
 
    ```json
@@ -274,7 +276,6 @@ search(query: string): {
 **指令类型详解**：
 
 1. **直接启动指令**（`type: 'direct'`）：
-
    - **系统应用**（`subType: 'app'`）：
      - macOS: `.app` 应用
      - Windows: `.lnk` 快捷方式
@@ -283,8 +284,8 @@ search(query: string): {
      - 38 个 Windows 系统设置（ms-settings URI）
      - 通过 `shell.openExternal()` 启动
      - 提供统一图标，支持亮/暗色模式
-2. **插件指令**（`type: 'plugin'`）：
 
+2. **插件指令**（`type: 'plugin'`）：
    - **功能指令**（`cmdType: 'text'`）：
      - 字符串类型的 cmd，如 `"搜索"`
      - 存入 `commands` 数组
@@ -540,6 +541,7 @@ installPluginFromMarket() - 下载并安装插件
      // 返回插件列表（包含 name, version, downloadUrl 等）
    }
    ```
+
 2. **从市场安装插件**：
 
    ```typescript
@@ -558,6 +560,7 @@ installPluginFromMarket() - 下载并安装插件
      // 5. 加载插件并通知渲染进程
    }
    ```
+
 3. **插件升级流程**（`PluginMarket.vue`）：
 
    ```typescript
@@ -639,6 +642,7 @@ updater 重启应用
      return { hasUpdate: true, updateInfo }
    }
    ```
+
 2. **执行更新**：
 
    ```typescript
@@ -697,12 +701,11 @@ updater 重启应用
 **平台差异**：
 
 - **macOS**：
-
   - app.asar 位置：`Contents/Resources/app.asar`
   - updater 位置：`Contents/MacOS/ztools-updater`
   - 应用路径：`Contents/MacOS/zTools`
-- **Windows**：
 
+- **Windows**：
   - app.asar 位置：`resources/app.asar`
   - updater 位置：应用根目录 `ztools-updater.exe`
   - 应用路径：`zTools.exe`
@@ -1326,15 +1329,15 @@ window.exports = {
 **平台特定限制**：
 
 - **macOS**：
-
   - 区域截图功能暂不支持
   - 窗口标识符：`bundleId` (string)
   - 系统设置功能暂不支持（仅 Windows）
-- **Windows**：
 
+- **Windows**：
   - 窗口标识符：`processId` (number)
   - 区域截图已支持
   - 系统设置功能已支持（38 个 ms-settings 指令）
+
 - **Linux**：暂不支持（需要实现 `linuxScanner.ts` 和对应的原生模块）
 
 **系统设置集成（Windows 专属）**：

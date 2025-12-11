@@ -41,7 +41,7 @@ const allSettings: Omit<SystemSetting, 'icon'>[] = [
   },
   {
     name: '编辑系统环境变量',
-    uri: 'rundll32 sysdm.cpl,EditEnvironmentVariables',
+    uri: 'SystemPropertiesAdvanced.exe',
     category: '系统'
   },
   {
