@@ -3,12 +3,16 @@
     <h2 class="title">我的数据</h2>
     <p class="description">查看和管理插件存储的数据</p>
 
-    <div v-if="pluginDataList.length === 0" class="empty">
+    <div v-if="isLoaded && pluginDataList.length === 0" class="empty">
       <p>暂无插件数据</p>
     </div>
 
-    <div v-else class="plugin-list">
-      <div v-for="pluginData in pluginDataList" :key="pluginData.pluginName" class="card plugin-card">
+    <div v-else-if="isLoaded && pluginDataList.length > 0" class="plugin-list">
+      <div
+        v-for="pluginData in pluginDataList"
+        :key="pluginData.pluginName"
+        class="card plugin-card"
+      >
         <img v-if="pluginData.logo" :src="pluginData.logo" class="plugin-icon" alt="插件图标" />
         <div v-else class="plugin-icon-placeholder">🧩</div>
 
@@ -18,8 +22,10 @@
             >{{ pluginData.docCount }} 个文档 / {{ pluginData.attachmentCount }} 个附件</span
           >
         </div>
-        
-        <button class="btn btn-primary" @click="viewPluginDocs(pluginData.pluginName)">查看文档</button>
+
+        <button class="btn btn-primary" @click="viewPluginDocs(pluginData.pluginName)">
+          查看文档
+        </button>
       </div>
     </div>
 
@@ -103,6 +109,7 @@ interface DocItem {
 }
 
 const pluginDataList = ref<PluginData[]>([])
+const isLoaded = ref(false)
 const showDocListModal = ref(false)
 const showDocDetailModal = ref(false)
 const currentPluginName = ref('')
@@ -126,6 +133,8 @@ async function loadPluginData(): Promise<void> {
     }
   } catch (error) {
     console.error('加载插件数据失败:', error)
+  } finally {
+    isLoaded.value = true
   }
 }
 
@@ -250,7 +259,6 @@ onMounted(() => {
   font-size: 14px;
 }
 
-.loading,
 .empty {
   text-align: center;
   padding: 40px 20px;
@@ -455,7 +463,10 @@ onMounted(() => {
   border-radius: 12px;
   font-size: 11px;
   font-weight: 600;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 .doc-key-display .value.type-badge.type-document {
