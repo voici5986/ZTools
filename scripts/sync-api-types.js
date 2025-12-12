@@ -28,6 +28,7 @@ const REPLACEMENTS = [
   { from: /export = utools/g, to: 'export = ztools' },
 
   // 文件名引用
+  { from: /ubw\.d\.ts/g, to: 'zbw.d.ts' },
   { from: /utools\.api\.d\.ts/g, to: 'ztools.api.d.ts' },
   { from: /resource\/utools\.schema/g, to: 'resource/ztools.schema' },
   { from: /utools\.schema\.json/g, to: 'ztools.schema.json' },
@@ -44,6 +45,9 @@ const REPLACEMENTS = [
   { from: /ubrowser/g, to: 'zbrowser' },
   { from: /utools\./g, to: 'ztools.' }, // 方法调用 utools.xxx() -> ztools.xxx()
 
+  // 组织和项目名称
+  { from: /uTools-Labs/gi, to: 'ZTools-Labs' },
+  
   // 描述文本（但保留一些特定的）
   { from: /\buTools\b/g, to: 'ZTools' }
 ]
@@ -52,6 +56,7 @@ const REPLACEMENTS = [
 const FILES_TO_CONVERT = [
   'index.d.ts',
   'utools.api.d.ts', // 会被重命名为 ztools.api.d.ts
+  'ubw.d.ts', // 会被重命名为 zbw.d.ts
   'electron.d.ts',
   'resource/utools.schema.json', // 会被重命名为 ztools.schema.json
   'package.json',
@@ -98,6 +103,7 @@ try {
     // 确定目标文件名（处理重命名）
     let targetFile = file
     if (file === 'utools.api.d.ts') targetFile = 'ztools.api.d.ts'
+    if (file === 'ubw.d.ts') targetFile = 'zbw.d.ts'
     if (file === 'resource/utools.schema.json') targetFile = 'resource/ztools.schema.json'
 
     const targetPath = path.join(TARGET_DIR, targetFile)
@@ -129,6 +135,7 @@ try {
     files: [
       'index.d.ts',
       'ztools.api.d.ts',
+      'zbw.d.ts',
       'electron.d.ts',
       'resource/',
       'README.md',
