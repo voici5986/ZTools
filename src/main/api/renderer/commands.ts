@@ -246,7 +246,7 @@ export class AppsAPI {
         }
 
         // 添加到历史记录
-        await this.addToHistory({ path, type: 'direct' as 'app', name })
+        await this.addToHistory({ path, type: 'app', name, cmdType: 'text' })
 
         // 通知渲染进程应用已启动（清空搜索框等）
         this.mainWindow?.webContents.send('app-launched')
@@ -273,11 +273,8 @@ export class AppsAPI {
     try {
       const { path: appPath, type = 'app', featureCode, name: cmdName, cmdType } = options
 
-      // 如果是匹配类型的命令（regex 或 over），不添加到历史记录
-      if (cmdType === 'regex' || cmdType === 'over') {
-        console.log('匹配类型的命令不添加到历史记录:', cmdName)
-        return
-      }
+      // 所有指令都添加到历史记录（包括匹配指令）
+      console.log('添加指令到历史记录:', cmdName, '类型:', cmdType || 'text')
 
       const now = Date.now()
 

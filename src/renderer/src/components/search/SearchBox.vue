@@ -45,6 +45,37 @@
         </div>
         <div class="clear-icon">×</div>
       </div>
+      <!-- 粘贴的文本显示 -->
+      <div v-if="pastedText" class="pasted-text" @click="clearPastedText">
+        <div class="text-icon">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M14 2V8H20M16 13H8M16 17H8M10 9H8"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <div class="text-info">
+          <span class="text-content">{{ truncatedPastedText }}</span>
+        </div>
+        <div class="clear-icon">×</div>
+      </div>
       <span ref="measureRef" class="measure-text"></span>
       <input
         ref="inputRef"
@@ -78,7 +109,11 @@
       <img
         v-else
         :src="avatarUrl"
-        :class="['search-btn', { 'default-avatar': isDefaultAvatar }]"
+        :class="[
+          'search-btn',
+          { 'default-avatar': isDefaultAvatar },
+          { 'plugin-logo': windowStore.currentPlugin?.logo }
+        ]"
         @click="handleSettingsClick"
       />
     </div>
@@ -101,6 +136,7 @@ const props = defineProps<{
   modelValue: string
   pastedImage?: string | null
   pastedFiles?: FileItem[] | null
+  pastedText?: string | null
   currentView?: string
 }>()
 
@@ -108,6 +144,7 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
   (e: 'update:pastedImage', value: string | null): void
   (e: 'update:pastedFiles', value: FileItem[] | null): void
+  (e: 'update:pastedText', value: string | null): void
   (e: 'keydown', event: KeyboardEvent): void
   (e: 'arrow-keydown', event: KeyboardEvent, direction: 'left' | 'right' | 'up' | 'down'): void
   (e: 'composing', isComposing: boolean): void
@@ -137,6 +174,14 @@ const avatarUrl = computed(() => {
 const isDefaultAvatar = computed(() => {
   return avatarUrl.value.includes('default.png')
 })
+
+// 截断显示的粘贴文本（最多显示30个字符）
+const truncatedPastedText = computed(() => {
+  if (!props.pastedText) return ''
+  if (props.pastedText.length <= 30) return props.pastedText
+  return props.pastedText.substring(0, 30) + '...'
+})
+
 const inputRef = ref<HTMLInputElement>()
 const measureRef = ref<HTMLSpanElement>()
 const isComposing = ref(false) // 是否正在输入法组合
@@ -181,18 +226,20 @@ function onKeydown(event: KeyboardEvent): void {
     return
   }
 
-  // 如果有粘贴的图片或文件，按 Backspace 或 Delete 键清除
+  // 如果有粘贴的图片、文件或文本，按 Backspace 或 Delete 键清除
   if (
-    (props.pastedImage || props.pastedFiles) &&
+    (props.pastedImage || props.pastedFiles || props.pastedText) &&
     (event.key === 'Backspace' || event.key === 'Delete')
   ) {
-    // 如果输入框为空，清除图片或文件
+    // 如果输入框为空，清除图片、文件或文本
     if (!props.modelValue) {
       event.preventDefault()
       if (props.pastedImage) {
         clearPastedImage()
       } else if (props.pastedFiles) {
         clearPastedFiles()
+      } else if (props.pastedText) {
+        clearPastedText()
       }
       return
     }
@@ -223,8 +270,11 @@ async function handlePaste(event: ClipboardEvent): Promise<void> {
       // 粘贴的是文件
       event.preventDefault() // 阻止默认粘贴行为
       emit('update:pastedFiles', copiedContent.data as FileItem[])
+    } else if (copiedContent?.type === 'text') {
+      // 粘贴的是文本
+      event.preventDefault() // 阻止默认粘贴行为
+      emit('update:pastedText', copiedContent.data as string)
     }
-    // 文本类型不需要特殊处理，使用浏览器默认行为
   } catch (error) {
     console.error('处理粘贴失败:', error)
   }
@@ -241,6 +291,14 @@ function clearPastedImage(): void {
 // 清除粘贴的文件
 function clearPastedFiles(): void {
   emit('update:pastedFiles', null)
+  nextTick(() => {
+    inputRef.value?.focus()
+  })
+}
+
+// 清除粘贴的文本
+function clearPastedText(): void {
+  emit('update:pastedText', null)
   nextTick(() => {
     inputRef.value?.focus()
   })
@@ -371,6 +429,8 @@ defineExpose({
   -webkit-app-region: drag;
   /* 整个区域默认可拖动 */
   position: relative;
+  overflow: hidden; /* 防止内容溢出 */
+  width: 100%; /* 确保宽度不超过父容器 */
 }
 
 .measure-text {
@@ -383,21 +443,16 @@ defineExpose({
 }
 
 .search-input {
-  min-width: 120px;
+  flex: 1;
+  min-width: 0; /* 允许缩小到最小 */
   max-width: 720px;
-  /* flex-shrink: 0; */
-  /* 不允许缩小 */
   height: 48px;
   line-height: 48px;
   font-size: 24px;
   border: none;
   outline: none;
   background: transparent;
-  border: none;
-  outline: none;
-  background: transparent;
   color: var(--text-color);
-  -webkit-app-region: no-drag;
   -webkit-app-region: no-drag;
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -421,13 +476,15 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0; /* 允许 flex 子元素缩小 */
+  overflow: hidden; /* 防止内容溢出 */
 }
 
 .pasted-image-thumbnail {
   position: relative;
   width: 48px;
   height: 48px;
-  flex-shrink: 0;
+  flex-shrink: 0; /* 图片缩略图不允许缩小，保持尺寸 */
   border-radius: 4px;
   overflow: hidden;
   cursor: pointer;
@@ -449,11 +506,13 @@ defineExpose({
   object-fit: cover;
 }
 
-.pasted-files {
+.pasted-files,
+.pasted-text {
   position: relative;
   max-width: 200px;
+  min-width: 100px; /* 最小宽度 */
   height: 35px;
-  flex-shrink: 0;
+  flex-shrink: 1; /* 允许缩小 */
   display: flex;
   align-items: center;
   gap: 8px;
@@ -466,15 +525,18 @@ defineExpose({
   -webkit-app-region: no-drag;
 }
 
-.pasted-files:hover {
+.pasted-files:hover,
+.pasted-text:hover {
   background: var(--hover-bg);
 }
 
-.pasted-files:hover .clear-icon {
+.pasted-files:hover .clear-icon,
+.pasted-text:hover .clear-icon {
   opacity: 1;
 }
 
-.file-icon {
+.file-icon,
+.text-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -483,7 +545,8 @@ defineExpose({
   opacity: 0.7;
 }
 
-.file-info {
+.file-info,
+.text-info {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -491,7 +554,8 @@ defineExpose({
   gap: 4px;
 }
 
-.file-name {
+.file-name,
+.text-content {
   font-size: 14px;
   color: var(--text-color);
   overflow: hidden;
@@ -526,6 +590,7 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0; /* 右侧按钮区域不允许缩小 */
 }
 
 .update-notification {
@@ -565,6 +630,12 @@ defineExpose({
   transition: all 0.2s;
   -webkit-app-region: no-drag;
   /* 按钮不可拖动 */
+}
+
+/* 插件图标：保持原本形状，不使用圆形遮罩 */
+.search-btn.plugin-logo {
+  border-radius: 6px;
+  object-fit: contain;
 }
 
 .search-btn:hover {

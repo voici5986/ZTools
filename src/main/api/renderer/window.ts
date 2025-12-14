@@ -1,6 +1,5 @@
 import { ipcMain } from 'electron'
 import windowManager from '../../windowManager.js'
-import databaseAPI from '../shared/database'
 
 /**
  * 窗口管理API - 主程序专用
@@ -25,15 +24,20 @@ export class WindowAPI {
   }
 
   private setupWindowEvents(): void {
-    // 监听窗口移动事件，保存位置
+    // 监听窗口移动事件，按显示器分别保存位置
     let moveTimeout: NodeJS.Timeout | null = null
     this.mainWindow?.on('move', () => {
       if (moveTimeout) clearTimeout(moveTimeout)
       moveTimeout = setTimeout(() => {
         if (this.mainWindow) {
           const [x, y] = this.mainWindow.getPosition()
-          databaseAPI.dbPut('window-position', { x, y })
-          console.log('保存窗口位置:', { x, y })
+          const displayId = windowManager.getCurrentDisplayId()
+          
+          if (displayId !== null) {
+            // 通过 windowManager 保存位置（异步，不阻塞）
+            windowManager.saveWindowPosition(displayId, x, y)
+            console.log(`保存窗口位置到显示器 ${displayId}:`, { x, y })
+          }
         }
       }, 500) // 500ms 防抖
     })

@@ -7,6 +7,7 @@
           v-model="searchQuery"
           v-model:pasted-image="pastedImageData"
           v-model:pasted-files="pastedFilesData"
+          v-model:pasted-text="pastedTextData"
           :current-view="currentView"
           @composing="handleComposing"
           @settings-click="handleSettingsClick"
@@ -21,6 +22,7 @@
         :search-query="searchQuery"
         :pasted-image="pastedImageData"
         :pasted-files="pastedFilesData"
+        :pasted-text="pastedTextData"
         @height-changed="updateWindowHeight"
       />
 
@@ -71,6 +73,8 @@ const searchResultsRef = ref<{
 const pastedImageData = ref<string | null>(null)
 // 粘贴的文件数据
 const pastedFilesData = ref<FileItem[] | null>(null)
+// 粘贴的文本数据
+const pastedTextData = ref<string | null>(null)
 
 // 监听搜索框输入变化
 watch(searchQuery, (newValue) => {
@@ -78,28 +82,41 @@ watch(searchQuery, (newValue) => {
   if (currentView.value === ViewMode.Plugin && windowStore.currentPlugin) {
     window.ztools.notifySubInputChange(newValue)
   }
-  // 输入变化时清除粘贴的图片和文件
+  // 输入变化时清除粘贴的图片、文件和文本
   if (newValue) {
     if (pastedImageData.value) pastedImageData.value = null
     if (pastedFilesData.value) pastedFilesData.value = null
+    if (pastedTextData.value) pastedTextData.value = null
   }
 })
 
 // 监听粘贴图片数据变化
 watch(pastedImageData, (newValue) => {
-  // 粘贴图片时清空搜索框文本和文件
+  // 粘贴图片时清空搜索框文本、文件和文本
   if (newValue) {
     searchQuery.value = ''
     pastedFilesData.value = null
+    pastedTextData.value = null
   }
 })
 
 // 监听粘贴文件数据变化
 watch(pastedFilesData, (newValue) => {
-  // 粘贴文件时清空搜索框文本和图片
+  // 粘贴文件时清空搜索框文本、图片和文本
   if (newValue) {
     searchQuery.value = ''
     pastedImageData.value = null
+    pastedTextData.value = null
+  }
+})
+
+// 监听粘贴文本数据变化
+watch(pastedTextData, (newValue) => {
+  // 粘贴文本时清空搜索框文本、图片和文件
+  if (newValue) {
+    searchQuery.value = ''
+    pastedImageData.value = null
+    pastedFilesData.value = null
   }
 })
 
@@ -497,6 +514,7 @@ onUnmounted(() => {
   flex-direction: column;
   background: var(--bg-color);
   outline: none;
+  overflow-x: hidden; /* 防止横向滚动条 */
 }
 
 .search-window {
@@ -505,6 +523,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   background: var(--bg-color);
+  overflow-x: hidden; /* 防止横向滚动条 */
 }
 
 .search-box-wrapper {

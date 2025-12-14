@@ -78,10 +78,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch, type ComponentPublicInstance } from 'vue'
-import Draggable from 'vuedraggable'
-import type { Command } from '../../stores/commandDataStore'
-import { highlightMatch } from '../../utils/highlight'
+import { computed, nextTick, ref, watch, type ComponentPublicInstance } from 'vue';
+import Draggable from 'vuedraggable';
+import type { Command } from '../../stores/commandDataStore';
+import { highlightMatch } from '../../utils/highlight';
 
 const props = withDefaults(
   defineProps<{

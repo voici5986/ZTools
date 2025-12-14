@@ -1,7 +1,7 @@
 <template>
   <div ref="scrollContainerRef" class="scrollable-content">
     <!-- 无搜索时显示历史 -->
-    <div v-if="!searchQuery.trim() && !pastedImage && !pastedFiles" class="content-section">
+    <div v-if="!searchQuery.trim() && !pastedImage && !pastedText && !pastedFiles" class="content-section">
       <!-- 最近使用 -->
       <CollapsibleList
         v-model:expanded="isRecentExpanded"
@@ -109,6 +109,7 @@ interface Props {
   searchQuery: string
   pastedImage?: string | null
   pastedFiles?: FileItem[] | null
+  pastedText?: string | null
 }
 
 const props = defineProps<Props>()
@@ -125,6 +126,7 @@ const {
   loading,
   search,
   searchImageCommands,
+  searchTextCommands,
   searchFileCommands,
   getRecentCommands,
   removeFromHistory,
@@ -152,6 +154,11 @@ const internalSearchResults = computed(() => {
     console.log('searchImageCommands', searchImageCommands())
     return searchImageCommands()
   }
+  // 如果粘贴了文本,返回支持文本的指令（根据文本长度过滤）
+  if (props.pastedText) {
+    console.log('searchTextCommands', searchTextCommands(props.pastedText))
+    return searchTextCommands(props.pastedText)
+  }
   // 如果粘贴了文件,返回支持文件的指令（根据配置过滤）
   if (props.pastedFiles) {
     console.log('searchFileCommands', searchFileCommands(props.pastedFiles))
@@ -164,8 +171,8 @@ const internalSearchResults = computed(() => {
 
 // 分离系统设置结果
 const systemSettingResults = computed(() => {
-  // 粘贴图片或文件时不显示系统设置
-  if (props.pastedImage || props.pastedFiles) return []
+  // 粘贴图片、文本或文件时不显示系统设置
+  if (props.pastedImage || props.pastedText || props.pastedFiles) return []
   if (!props.searchQuery.trim()) return []
   return internalSearchResults.value.filter(
     (item: any) => item.type === 'direct' && item.subType === 'system-setting'
@@ -174,8 +181,8 @@ const systemSettingResults = computed(() => {
 
 // 应用和插件结果（排除系统设置）
 const appAndPluginResults = computed(() => {
-  // 粘贴图片或文件时显示所有支持对应类型的指令
-  if (props.pastedImage || props.pastedFiles) {
+  // 粘贴图片、文本或文件时显示所有支持对应类型的指令
+  if (props.pastedImage || props.pastedText || props.pastedFiles) {
     return internalSearchResults.value
   }
   if (!props.searchQuery.trim()) return []
@@ -186,8 +193,8 @@ const appAndPluginResults = computed(() => {
 
 // 推荐列表
 const recommendations = computed(() => {
-  // 粘贴图片或文件时不显示推荐
-  if (props.pastedImage || props.pastedFiles) return []
+  // 粘贴图片、文本或文件时不显示推荐
+  if (props.pastedImage || props.pastedText || props.pastedFiles) return []
   if (props.searchQuery.trim() === '') {
     return []
   }
@@ -231,8 +238,8 @@ const finderActions = computed(() => {
 
 // 显示的应用列表
 const displayApps = computed(() => {
-  // 粘贴图片或文件时不显示历史记录
-  if (props.pastedImage || props.pastedFiles) return []
+  // 粘贴图片、文本或文件时不显示历史记录
+  if (props.pastedImage || props.pastedText || props.pastedFiles) return []
   if (props.searchQuery.trim() === '') {
     return getRecentCommands()
   } else {
@@ -310,8 +317,8 @@ const visibleRecommendations = computed(() => {
 const navigationGrid = computed(() => {
   const sections: any[] = []
 
-  if (props.searchQuery.trim() || props.pastedImage || props.pastedFiles) {
-    // 有搜索或粘贴图片/文件时：应用和插件 + 系统设置 + 推荐
+  if (props.searchQuery.trim() || props.pastedImage || props.pastedText || props.pastedFiles) {
+    // 有搜索或粘贴图片/文本/文件时：应用和插件 + 系统设置 + 推荐
     if (visibleAppAndPluginResults.value.length > 0) {
       const searchGrid = arrayToGrid(visibleAppAndPluginResults.value)
       searchGrid.forEach((row) => {
@@ -413,10 +420,12 @@ const selectedItem = computed(() => {
 })
 
 // 监听搜索内容变化,重置选中状态
-watch([() => props.searchQuery, () => props.pastedImage, () => props.pastedFiles], () => {
-  selectedRow.value = 0
-  selectedCol.value = 0
-  nextTick(() => {
+watch(
+  [() => props.searchQuery, () => props.pastedImage, () => props.pastedText, () => props.pastedFiles],
+  () => {
+    selectedRow.value = 0
+    selectedCol.value = 0
+    nextTick(() => {
     emit('height-changed')
   })
 })
@@ -590,6 +599,9 @@ async function handleSelectApp(app: any): Promise<void> {
     if (app.cmdType === 'img' && props.pastedImage) {
       // 图片类型：传递 base64 字符串
       payload = props.pastedImage
+    } else if (app.cmdType === 'over' && props.pastedText) {
+      // 文本类型：传递粘贴的文本
+      payload = props.pastedText
     } else if (app.cmdType === 'files' && props.pastedFiles) {
       // 文件类型：将 FileItem[] 转换为 MatchFile[]
       payload = props.pastedFiles.map((file) => ({

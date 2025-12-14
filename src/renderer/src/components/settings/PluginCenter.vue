@@ -81,6 +81,27 @@
                 </svg>
               </button>
               <button
+                class="icon-btn folder-btn"
+                title="打开插件目录"
+                @click.stop="handleOpenFolder(plugin)"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                  ></path>
+                </svg>
+              </button>
+              <button
                 class="icon-btn reload-btn"
                 :disabled="isReloading"
                 title="重新加载 plugin.json 配置文件"
@@ -157,8 +178,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useCommandDataStore } from '../../stores/commandDataStore'
-import PluginDetail from './PluginDetail.vue'
 import Icon from '../common/Icon.vue'
+import PluginDetail from './PluginDetail.vue'
 
 const appDataStore = useCommandDataStore()
 
@@ -319,6 +340,16 @@ async function handleOpenPlugin(plugin: any): Promise<void> {
   } catch (error: any) {
     console.error('打开插件失败:', error)
     alert(`打开插件失败: ${error.message || '未知错误'}`)
+  }
+}
+
+// 打开插件目录
+async function handleOpenFolder(plugin: any): Promise<void> {
+  try {
+    await window.ztools.revealInFinder(plugin.path)
+  } catch (error: any) {
+    console.error('打开目录失败:', error)
+    alert(`打开目录失败: ${error.message || '未知错误'}`)
   }
 }
 
@@ -564,6 +595,14 @@ function closePluginDetail(): void {
 
 .kill-btn:hover:not(:disabled) {
   background: var(--warning-light-bg);
+}
+
+.folder-btn {
+  color: var(--primary-color);
+}
+
+.folder-btn:hover {
+  background: var(--primary-light-bg);
 }
 
 .reload-btn {
