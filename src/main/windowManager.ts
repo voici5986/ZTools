@@ -361,7 +361,7 @@ class WindowManager {
   public async saveWindowPosition(displayId: number, x: number, y: number): Promise<void> {
     // 更新内存中的数据
     this.windowPositionsByDisplay[displayId] = { x, y }
-    
+
     // 异步保存到数据库，不阻塞
     try {
       await databaseAPI.dbPut('window-positions-by-display', this.windowPositionsByDisplay)
