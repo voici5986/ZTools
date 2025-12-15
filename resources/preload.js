@@ -394,15 +394,15 @@ electron.ipcRenderer.on('call-plugin-method', async (event, { featureCode, actio
 })
 
 // 监听 ESC 键，支持插件内部阻止返回
-// window.addEventListener(
-//   'keydown',
-//   (e) => {
-//     if (e.key === 'Escape') {
-//       electron.ipcRenderer.send('plugin-esc-pressed')
-//     }
-//   },
-//   true
-// )
+window.addEventListener(
+  'keydown',
+  (e) => {
+    if (e.key === 'Escape') {
+      electron.ipcRenderer.send('plugin-esc-pressed')
+    }
+  },
+  false
+)
 
 // 监听主进程获取插件模式的请求
 electron.ipcRenderer.on('get-plugin-mode', (event, { featureCode, callId }) => {

@@ -36,6 +36,13 @@ export class PluginUIAPI {
     // 隐藏插件
     ipcMain.on('hide-plugin', () => this.hidePlugin())
 
+    // 插件 ESC 按键事件（由插件 preload 通过 JS 拦截后上报）
+    ipcMain.on('plugin-esc-pressed', () => {
+      if (this.pluginManager && typeof this.pluginManager.handlePluginEsc === 'function') {
+        this.pluginManager.handlePluginEsc()
+      }
+    })
+
     // 获取是否深色主题
     ipcMain.on('is-dark-colors', (event) => {
       event.returnValue = nativeTheme.shouldUseDarkColors

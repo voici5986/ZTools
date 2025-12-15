@@ -141,11 +141,8 @@ class PluginManager {
         }
       })
 
-      // 监听 ESC 键和 Cmd+D 快捷键
+      // 监听 Cmd+D / Ctrl+D 快捷键（ESC 改为在插件 preload 中通过 JS 拦截后再通过 IPC 通知）
       this.pluginView.webContents.on('before-input-event', (_event, input) => {
-        if (input.type === 'keyDown' && input.key === 'Escape') {
-          this.handlePluginEsc()
-        }
         // Cmd+D / Ctrl+D: 分离插件到独立窗口
         if (
           input.type === 'keyDown' &&
@@ -599,7 +596,7 @@ class PluginManager {
   }
 
   // 处理插件按 ESC 键
-  private handlePluginEsc(): void {
+  public handlePluginEsc(): void {
     console.log('插件按下 ESC 键 (Main Process)，返回搜索页面')
     this.hidePluginView()
     // 通知渲染进程返回搜索页面

@@ -170,6 +170,13 @@ class WindowManager {
     this.mainWindow.on('close', (event) => {
       if (!this.isQuitting) {
         event.preventDefault()
+
+        // 若当前处于插件页面，先退出插件回到主搜索框
+        if (pluginManager.getCurrentPluginPath() !== null) {
+          pluginManager.handlePluginEsc()
+          return
+        }
+
         this.mainWindow?.hide()
       }
     })
