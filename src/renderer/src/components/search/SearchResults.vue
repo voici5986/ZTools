@@ -652,54 +652,77 @@ async function handleRecommendationSelect(item: any): Promise<void> {
   }
 }
 
-// 键盘导航
+// 键盘导航（支持循环）
 async function handleKeydown(event: KeyboardEvent): Promise<void> {
   const grid = navigationGrid.value
   if (!grid || grid.length === 0) return
 
   switch (event.key) {
-    case 'ArrowDown':
+    case 'ArrowDown': {
       event.preventDefault()
       if (selectedRow.value < grid.length - 1) {
+        // 不是最后一行，正常向下
         selectedRow.value++
-        const currentRowItems = grid[selectedRow.value].items
-        selectedCol.value = Math.min(selectedCol.value, currentRowItems.length - 1)
+      } else {
+        // 最后一行，循环到第一行
+        selectedRow.value = 0
       }
+      // 调整列索引，确保不超出当前行的范围
+      const currentRowItems = grid[selectedRow.value].items
+      selectedCol.value = Math.min(selectedCol.value, currentRowItems.length - 1)
       break
-    case 'ArrowUp':
+    }
+    case 'ArrowUp': {
       event.preventDefault()
       if (selectedRow.value > 0) {
+        // 不是第一行，正常向上
         selectedRow.value--
-        const currentRowItems = grid[selectedRow.value].items
-        selectedCol.value = Math.min(selectedCol.value, currentRowItems.length - 1)
+      } else {
+        // 第一行，循环到最后一行
+        selectedRow.value = grid.length - 1
       }
+      // 调整列索引，确保不超出当前行的范围
+      const upRowItems = grid[selectedRow.value].items
+      selectedCol.value = Math.min(selectedCol.value, upRowItems.length - 1)
       break
-    case 'ArrowRight':
+    }
+    case 'ArrowRight': {
       event.preventDefault()
       if (grid.length > 0 && selectedRow.value < grid.length) {
         const currentRowItems = grid[selectedRow.value].items
         if (selectedCol.value < currentRowItems.length - 1) {
-          // 当前行还有下一个项目
+          // 当前行还有下一个项目，正常右移
           selectedCol.value++
         } else if (selectedRow.value < grid.length - 1) {
           // 当前行最后一个，跳到下一行第一个
           selectedRow.value++
           selectedCol.value = 0
+        } else {
+          // 最后一行的最后一个，循环到第一行第一个
+          selectedRow.value = 0
+          selectedCol.value = 0
         }
       }
       break
-    case 'ArrowLeft':
+    }
+    case 'ArrowLeft': {
       event.preventDefault()
       if (selectedCol.value > 0) {
-        // 当前行还有前一个项目
+        // 当前行还有前一个项目，正常左移
         selectedCol.value--
       } else if (selectedRow.value > 0) {
         // 当前行第一个，跳到上一行最后一个
         selectedRow.value--
         const prevRowItems = grid[selectedRow.value].items
         selectedCol.value = prevRowItems.length - 1
+      } else {
+        // 第一行第一个，循环到最后一行最后一个
+        selectedRow.value = grid.length - 1
+        const lastRowItems = grid[selectedRow.value].items
+        selectedCol.value = lastRowItems.length - 1
       }
       break
+    }
     case 'Enter': {
       event.preventDefault()
       const item = selectedItem.value
