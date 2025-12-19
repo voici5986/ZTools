@@ -182,7 +182,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import Icon from '../common/Icon.vue'
 import PluginDetail from './PluginDetail.vue'
 
@@ -379,9 +379,22 @@ async function handleReloadPlugin(plugin: any): Promise<void> {
   }
 }
 
+// 处理 ESC 按键
+function handleKeydown(e: KeyboardEvent): void {
+  if (e.key === 'Escape' && isDetailVisible.value) {
+    e.stopPropagation()
+    closePluginDetail()
+  }
+}
+
 // 初始化时加载插件列表
 onMounted(() => {
   loadPlugins()
+  window.addEventListener('keydown', handleKeydown, true)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown, true)
 })
 
 // 打开插件详情

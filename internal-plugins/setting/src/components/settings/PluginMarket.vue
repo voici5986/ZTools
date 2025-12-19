@@ -119,7 +119,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import PluginDetail from './PluginDetail.vue'
 
 interface Plugin {
@@ -321,8 +321,21 @@ async function downloadPlugin(plugin: Plugin): Promise<void> {
   }
 }
 
+// 处理 ESC 按键
+function handleKeydown(e: KeyboardEvent): void {
+  if (e.key === 'Escape' && isDetailVisible.value) {
+    e.stopPropagation()
+    closePluginDetail()
+  }
+}
+
 onMounted(() => {
   fetchPlugins()
+  window.addEventListener('keydown', handleKeydown, true)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown, true)
 })
 </script>
 

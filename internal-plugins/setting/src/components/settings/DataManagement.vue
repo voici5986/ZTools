@@ -97,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import DetailPanel from '../common/DetailPanel.vue'
 import Icon from '../common/Icon.vue'
 
@@ -231,8 +231,26 @@ async function handleClearData(): Promise<void> {
   }
 }
 
+// 处理 ESC 按键
+function handleKeydown(e: KeyboardEvent): void {
+  if (e.key === 'Escape') {
+    if (currentLevel.value === 'docDetail') {
+      e.stopPropagation()
+      closeDocDetailModal()
+    } else if (currentLevel.value === 'docList') {
+      e.stopPropagation()
+      closeDocListModal()
+    }
+  }
+}
+
 onMounted(() => {
   loadPluginData()
+  window.addEventListener('keydown', handleKeydown, true)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown, true)
 })
 </script>
 
