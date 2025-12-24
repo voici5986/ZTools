@@ -5,13 +5,14 @@ import {
   globalShortcut,
   Menu,
   nativeImage,
-  nativeTheme,
+  // nativeTheme,
   screen,
   Tray
 } from 'electron'
 import path from 'path'
-import trayIconLight from '../../../resources/icons/trayTemplate@2x-light.png?asset'
+// import trayIconLight from '../../../resources/icons/trayTemplate@2x-light.png?asset'
 import trayIcon from '../../../resources/icons/trayTemplate@2x.png?asset'
+import windowsIcon from '../../../resources/icons/windows-icon.png?asset'
 
 import api from '../api'
 import clipboardManager from './clipboardManager'
@@ -226,8 +227,8 @@ class WindowManager {
     } else {
       // Windows/Linux - 根据系统主题选择图标
       // 暗色模式用 light（白色图标），亮色模式用 dark（黑色图标）
-      const iconPath = nativeTheme.shouldUseDarkColors ? trayIconLight : trayIcon
-      icon = nativeImage.createFromPath(iconPath)
+      // const iconPath = nativeTheme.shouldUseDarkColors ? trayIconLight : trayIcon
+      icon = nativeImage.createFromPath(windowsIcon)
     }
 
     this.tray = new Tray(icon)
@@ -251,24 +252,24 @@ class WindowManager {
     })
 
     // 监听系统主题变化（Windows/Linux）
-    if (!platform.isMacOS) {
-      nativeTheme.on('updated', () => {
-        this.updateTrayIcon()
-      })
-    }
+    // if (!platform.isMacOS) {
+    //   nativeTheme.on('updated', () => {
+    //     this.updateTrayIcon()
+    //   })
+    // }
   }
 
   /**
    * 更新托盘图标（用于主题切换）
    */
-  private updateTrayIcon(): void {
-    if (!this.tray || platform.isMacOS) return
+  // private updateTrayIcon(): void {
+  //   if (!this.tray || platform.isMacOS) return
 
-    // 暗色模式用 light（白色图标），亮色模式用 dark（黑色图标）
-    const iconPath = nativeTheme.shouldUseDarkColors ? trayIconLight : trayIcon
-    const icon = nativeImage.createFromPath(iconPath)
-    this.tray.setImage(icon)
-  }
+  //   // 暗色模式用 light（白色图标），亮色模式用 dark（黑色图标）
+  //   const iconPath = nativeTheme.shouldUseDarkColors ? trayIconLight : trayIcon
+  //   const icon = nativeImage.createFromPath(iconPath)
+  //   this.tray.setImage(icon)
+  // }
 
   /**
    * 创建托盘菜单
