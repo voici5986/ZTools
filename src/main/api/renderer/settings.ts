@@ -156,6 +156,9 @@ export class SettingsAPI {
   // 注册全局快捷键
   private async registerGlobalShortcut(shortcut: string, target: string): Promise<any> {
     try {
+      // 先尝试取消注册该快捷键（如果已被注册），避免重复注册导致失败
+      globalShortcut.unregister(shortcut)
+
       const success = globalShortcut.register(shortcut, () => {
         console.log(`全局快捷键触发: ${shortcut} -> ${target}`)
         this.handleGlobalShortcut(target)
