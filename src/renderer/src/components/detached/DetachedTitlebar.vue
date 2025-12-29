@@ -456,30 +456,32 @@ function sendArrowKeyToPlugin(key: string): void {
 /* Windows 窗口控制按钮 */
 .window-controls {
   display: flex;
+  gap: 4px;
   margin-left: 8px;
   -webkit-app-region: no-drag;
 }
 
 .window-btn {
-  width: 46px;
-  height: 52px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
+  border-radius: 4px;
   color: var(--titlebar-icon);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .window-btn:hover {
-  background: var(--win-button-hover);
+  background: var(--hover-bg);
   color: var(--titlebar-icon-hover);
 }
 
 .window-btn.close-btn:hover {
-  background: var(--win-close-hover);
+  background: #ef4444;
   color: #ffffff;
 }
 </style>

@@ -127,7 +127,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 10px 16px;
+  padding: 6px 16px;
   background: var(--control-bg);
   border: 2px solid var(--control-border);
   border-radius: 6px;
@@ -214,7 +214,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 10px 16px;
+  padding: 6px 16px;
   color: var(--text-color);
   font-size: 14px;
   cursor: pointer;
@@ -274,6 +274,4 @@ onBeforeUnmount(() => {
     transform: translateY(-4px);
   }
 }
-
 </style>
-

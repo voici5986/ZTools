@@ -41,13 +41,13 @@ class DetachedWindowManager {
   private async applyWindowMaterial(win: BrowserWindow): Promise<void> {
     try {
       const settings = await lmdbInstance.promises.get('ZTOOLS/settings-general')
-      const material = (settings?.data?.windowMaterial as 'mica' | 'acrylic' | 'none') || 'mica'
+      const material = (settings?.data?.windowMaterial as 'mica' | 'acrylic' | 'none') || 'none'
 
       console.log('分离窗口应用材质:', material)
       applyWindowMaterial(win, material)
     } catch (error) {
       console.error('读取窗口材质配置失败，使用默认值 (mica):', error)
-      applyWindowMaterial(win, 'mica')
+      applyWindowMaterial(win, 'none')
     }
   }
 
@@ -150,6 +150,7 @@ class DetachedWindowManager {
         resizable: true,
         minWidth: 400,
         minHeight: 300,
+        hasShadow: true, // 启用窗口阴影（可调整为 false 来移除阴影）
         webPreferences: {
           preload: path.join(__dirname, '../preload/index.js'),
           backgroundThrottling: false, // 窗口最小化时是否继续动画和定时器

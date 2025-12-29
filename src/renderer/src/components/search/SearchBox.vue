@@ -889,6 +889,7 @@ defineExpose({
   width: 100%; /* 确保宽度不超过父容器 */
   z-index: 10; /* 确保在其他内容之上 */
   user-select: none; /* 禁止选取文本 */
+  border-radius: 0; /* 组件本身不要圆角 */
 }
 
 /* 拖放蒙版 */
