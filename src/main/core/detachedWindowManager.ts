@@ -161,8 +161,13 @@ class DetachedWindowManager {
         }
       }
 
+      // macOS 系统配置：设置透明度和毛玻璃效果（与主窗口一致）
+      if (isMac) {
+        windowConfig.transparent = true
+        windowConfig.vibrancy = 'fullscreen-ui'
+      }
       // Windows 系统配置（与主窗口保持一致）
-      if (isWindows) {
+      else if (isWindows) {
         windowConfig.backgroundColor = '#00000000' // 完全透明，让 Mica 材质显示
       }
 
