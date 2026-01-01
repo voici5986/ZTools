@@ -878,13 +878,6 @@ async function loadSettings(): Promise<void> {
     const data = await window.ztools.internal.dbGet('settings-general')
     console.log('加载到的设置:', data)
 
-    // 获取默认窗口材质（Windows 11 默认为 acrylic，其他为 none）
-    let defaultWindowMaterial: 'mica' | 'acrylic' | 'none' = 'none'
-    if (platform.value === 'win32') {
-      const isWin11 = await window.ztools.internal.isWindows11()
-      defaultWindowMaterial = isWin11 ? 'acrylic' : 'none'
-    }
-
     if (data) {
       opacity.value = data.opacity ?? 1
       hotkey.value = data.hotkey ?? defaultHotkey.value
@@ -895,7 +888,8 @@ async function loadSettings(): Promise<void> {
       autoClear.value = data.autoClear ?? 'immediately'
       theme.value = data.theme ?? 'system'
       primaryColor.value = data.primaryColor ?? 'blue'
-      windowMaterial.value = data.windowMaterial ?? defaultWindowMaterial
+      // 窗口材质由主进程启动时保证一定有值，无需兜底
+      windowMaterial.value = data.windowMaterial
       acrylicLightOpacity.value = data.acrylicLightOpacity ?? 78
       acrylicDarkOpacity.value = data.acrylicDarkOpacity ?? 50
 

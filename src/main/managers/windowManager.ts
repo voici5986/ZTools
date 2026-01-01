@@ -576,10 +576,23 @@ class WindowManager {
   private async applyWindowMaterialFromSettings(): Promise<void> {
     try {
       const settings = await lmdbInstance.promises.get('ZTOOLS/settings-general')
-      const material =
-        (settings?.data?.windowMaterial as WindowMaterial) || getDefaultWindowMaterial()
+      const savedMaterial = settings?.data?.windowMaterial as WindowMaterial | undefined
+      const material = savedMaterial || getDefaultWindowMaterial()
 
       console.log('从配置读取窗口材质:', material)
+
+      // 如果数据库中没有保存材质配置，保存默认值
+      if (!savedMaterial) {
+        console.log('数据库中没有窗口材质配置，保存默认值:', material)
+        const updatedSettings = {
+          _id: 'ZTOOLS/settings-general',
+          data: {
+            ...(settings?.data || {}),
+            windowMaterial: material
+          }
+        }
+        await lmdbInstance.promises.put(updatedSettings)
+      }
 
       this.applyMaterial(material)
 
