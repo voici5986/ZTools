@@ -552,6 +552,8 @@ onUnmounted(() => {
   border-radius: 6px;
   padding: 12px;
   overflow-x: auto;
+  user-select: text;
+  cursor: text;
 }
 
 .doc-content pre {
@@ -562,5 +564,6 @@ onUnmounted(() => {
   color: var(--text-primary);
   white-space: pre-wrap;
   word-break: break-all;
+  user-select: text;
 }
 </style>
